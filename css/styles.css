@@ -897,6 +897,12 @@ nav {
   background: var(--school-secondary-light);
   color: #92400e;
 }
+.tt-session-multi{grid-template-columns:90px 1fr !important;align-items:flex-start !important;}
+.tt-multi-papers{display:flex;flex-direction:column;gap:.4rem;}
+.tt-paper-row{display:grid;grid-template-columns:1fr 80px 110px;gap:.75rem;align-items:center;padding:.4rem .6rem;background:var(--bg-muted);border-radius:6px;}
+.tt-paper-row .tt-subject{color:var(--text-primary);font-weight:500;font-size:.82rem;}
+.tt-paper-row .tt-duration{color:var(--text-muted);font-size:.78rem;}
+.tt-paper-row .tt-venue{color:var(--text-secondary);font-size:.78rem;}
 
 .print-btn {
   margin-top: 1.25rem;

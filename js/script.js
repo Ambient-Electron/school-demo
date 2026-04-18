@@ -229,46 +229,86 @@ function closeAnnouncement() {
   document.getElementById("announcement-bar").classList.remove("show");
 }
 
-/* ── TIMETABLE — GROUP BY DATE ───────────────────────────── */
-function groupByDate(rows) {
-  const map = new Map();
-  rows.forEach((row) => {
-    const date = row.date || row.Date || "";
-    if (!map.has(date))
-      map.set(date, { day: row.day || row.Day || "", sessions: [] });
-    map.get(date).sessions.push(row);
+/* ── TIMETABLE — GROUP BY DATE THEN BY TIME ─────────────── */
+/*
+  Logic:
+  - Group rows by date → each date = one day block
+  - Within each date, group by time → same start time = one session block
+  - Same time = written simultaneously (different subjects/venues listed together)
+  - Different times = separate session blocks (AM / PM)
+
+  Sheet example:
+    10 Jun | Monday | English P1   | 09:00 | 2 hrs | Hall A  ─┐ Session 1
+    10 Jun | Monday | Afrikaans P1 | 09:00 | 2 hrs | Hall B  ─┘ (same time)
+    10 Jun | Monday | English P2   | 14:00 | 2 hrs | Hall A     Session 2
+*/
+function groupByDateThenTime(rows) {
+  const dateMap = new Map();
+  rows.forEach(row => {
+    const date    = (row.date    || row.Date    || '').trim();
+    const day     = (row.day     || row.Day     || '').trim();
+    const time    = (row.time    || row.Time    || row['Start Time'] || row.starttime || '').trim();
+    const subject = (row.subject || row.Subject || '').trim();
+    const duration= (row.duration|| row.Duration|| '').trim();
+    const venue   = (row.venue   || row.Venue   || '').trim();
+    if (!date) return;
+    if (!dateMap.has(date)) dateMap.set(date, { day, timeSlots: new Map() });
+    const dayGroup = dateMap.get(date);
+    if (!dayGroup.timeSlots.has(time)) dayGroup.timeSlots.set(time, []);
+    dayGroup.timeSlots.get(time).push({ subject, duration, venue });
   });
-  return map;
+  return dateMap;
+}
+
+function isAMTime(time) {
+  const hour = parseInt((time || '0').split(':')[0], 10);
+  return hour < 12;
 }
 
 function renderTimetable(rows) {
-  if (!rows || !rows.length)
-    return '<div class="empty-state"><div class="empty-icon">📅</div><p>No timetable data available. Update the Google Sheet to populate this timetable.</p></div>';
+  if (!rows || !rows.length) return '<div class="empty-state"><div class="empty-icon">📅</div><p>No timetable data available. Update the Google Sheet to populate this timetable.</p></div>';
 
-  const grouped = groupByDate(rows);
-  let html = "";
+  const dateMap = groupByDateThenTime(rows);
+  let html = '';
 
-  grouped.forEach((group, date) => {
+  dateMap.forEach((dayGroup, date) => {
+    const sessionCount = dayGroup.timeSlots.size;
     html += `<div class="tt-day-group">
       <div class="tt-day-header">
         <span class="tt-day-label">${date}</span>
-        <span class="tt-day-name">${group.day}</span>
-        ${group.sessions.length > 1 ? `<span class="meta-badge blue" style="margin-left:auto;font-size:.7rem;">${group.sessions.length} sessions</span>` : ""}
+        <span class="tt-day-name">${dayGroup.day}</span>
+        ${sessionCount > 1 ? `<span class="meta-badge blue" style="margin-left:auto;font-size:.7rem;">${sessionCount} session${sessionCount > 1 ? 's' : ''}</span>` : ''}
       </div>
       <div class="tt-sessions">`;
 
-    group.sessions.forEach((s, idx) => {
-      const time = s.time || s["Start Time"] || s.starttime || "";
-      const isAM =
-        !time.startsWith("1") || time.startsWith("10") || time.startsWith("11");
-      const pillClass = isAM ? "" : "pm";
-      const pillLabel = isAM ? "AM" : "PM";
-      html += `<div class="tt-session">
-        <div class="tt-time">${time}<span class="session-pill ${pillClass}">${pillLabel}</span></div>
-        <div class="tt-subject">${s.subject || s.Subject || ""}</div>
-        <div class="tt-duration">${s.duration || s.Duration || ""}</div>
-        <div class="tt-venue">${s.venue || s.Venue || ""}</div>
-      </div>`;
+    dayGroup.timeSlots.forEach((papers, time) => {
+      const am = isAMTime(time);
+      const pillClass = am ? '' : 'pm';
+      const pillLabel = am ? 'AM' : 'PM';
+
+      if (papers.length > 1) {
+        /* Multiple subjects at the same time — one session block, list papers inside */
+        html += `<div class="tt-session tt-session-multi">
+          <div class="tt-time">${time}<span class="session-pill ${pillClass}">${pillLabel}</span></div>
+          <div class="tt-multi-papers">
+            ${papers.map(p => `
+              <div class="tt-paper-row">
+                <span class="tt-subject">${p.subject}</span>
+                <span class="tt-duration">${p.duration}</span>
+                <span class="tt-venue">${p.venue}</span>
+              </div>`).join('')}
+          </div>
+        </div>`;
+      } else {
+        /* Single subject at this time — normal single row */
+        const p = papers[0];
+        html += `<div class="tt-session">
+          <div class="tt-time">${time}<span class="session-pill ${pillClass}">${pillLabel}</span></div>
+          <div class="tt-subject">${p.subject}</div>
+          <div class="tt-duration">${p.duration}</div>
+          <div class="tt-venue">${p.venue}</div>
+        </div>`;
+      }
     });
 
     html += `</div></div>`;
@@ -276,6 +316,7 @@ function renderTimetable(rows) {
 
   return html;
 }
+
 
 async function loadGradeTimetable(grade) {
   const key = `grade${grade}`;

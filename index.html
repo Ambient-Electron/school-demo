@@ -1,13 +1,2087 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>School Demo</title>
-    <link rel="stylesheet" href="./assets/style.css">
-</head>
-<body>
-    
-    <script src="./assets/script.js"></script>
-</body>
+    <link rel="stylesheet" href="./css/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <script>
+      const SHEETS = {
+        news: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR9TvZBjm-qXRvRKViitTJ-HtI_GgkFHiMqgVqONuWNgnwFVMMk7osRLGJRtdYpeeNMU6CwPg_TlEDj/pub?gid=0&single=true&output=csv",
+        announcements: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR9TvZBjm-qXRvRKViitTJ-HtI_GgkFHiMqgVqONuWNgnwFVMMk7osRLGJRtdYpeeNMU6CwPg_TlEDj/pub?gid=1607962110&single=true&output=csv",
+        events: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR9TvZBjm-qXRvRKViitTJ-HtI_GgkFHiMqgVqONuWNgnwFVMMk7osRLGJRtdYpeeNMU6CwPg_TlEDj/pub?gid=1851001812&single=true&output=csv",
+        grade10: "YOUR_TIMETABLE_GRADE10_CSV_URL_HERE",
+        grade11: "YOUR_TIMETABLE_GRADE11_CSV_URL_HERE",
+        grade12: "YOUR_TIMETABLE_GRADE12_CSV_URL_HERE",
+      };
+
+      /* ── SAMPLE DATA (shown when no sheet is connected) ── */ 
+      const SAMPLE = {
+        news: [
+          {
+            title: "Term 2 Results Released",
+            date: "30 May 2024",
+            category: "Academic",
+            description:
+              "Grade 12 students achieved an outstanding 91% pass rate. We are incredibly proud of our Class of 2024 and the hard work of every teacher involved.",
+            icon: "🏆",
+          },
+          {
+            title: "Sports Day — Save the Date!",
+            date: "5 June 2024",
+            category: "Events",
+            description:
+              "Our Annual Sports Day takes place on June 15. All parents are warmly invited to come and cheer on our athletes from 08:00.",
+            icon: "⚽",
+          },
+          {
+            title: "Science Fair Applications Open",
+            date: "28 May 2024",
+            category: "Academic",
+            description:
+              "Grade 10–12 students are invited to submit project proposals for the Annual Science & Innovation Fair. Deadline: 30 June 2024.",
+            icon: "🔬",
+          },
+        ],
+        announcements: [
+          {
+            message:
+              "School closes this Friday 14 June at 12:00 for the start of exam week. All learners must be collected by 12:30.",
+            date: "10 Jun 2024",
+            type: "Urgent",
+            active: "YES",
+          },
+        ],
+        events: [
+          {
+            name: "Annual Sports Day",
+            date: "15",
+            day: "Saturday",
+            month: "Jun",
+            description:
+              "Full day of athletic events. Parents welcome from 08:00.",
+            icon: "🏃",
+          },
+          {
+            name: "School Gala Evening",
+            date: "20",
+            day: "Saturday",
+            month: "Jul",
+            description:
+              "Showcase of student talent in music, drama and dance.",
+            icon: "🎭",
+          },
+          {
+            name: "Science & Innovation Fair",
+            date: "10",
+            day: "Saturday",
+            month: "Aug",
+            description: "Student project exhibition. Open to the community.",
+            icon: "🔬",
+          },
+          {
+            name: "Prize Giving Ceremony",
+            date: "28",
+            day: "Friday",
+            month: "Sep",
+            description:
+              "Annual prize giving for academic and co-curricular achievement.",
+            icon: "🏆",
+          },
+        ],
+        grade10: [
+          {
+            date: "10 Jun",
+            day: "Monday",
+            subject: "English HL — Paper 1",
+            time: "09:00",
+            duration: "2 hrs",
+            venue: "Hall A",
+          },
+          {
+            date: "10 Jun",
+            day: "Monday",
+            subject: "English HL — Paper 2",
+            time: "14:00",
+            duration: "2 hrs",
+            venue: "Hall A",
+          },
+          {
+            date: "11 Jun",
+            day: "Tuesday",
+            subject: "Mathematics — Paper 1",
+            time: "09:00",
+            duration: "2 hrs",
+            venue: "Classrooms A–D",
+          },
+          {
+            date: "11 Jun",
+            day: "Tuesday",
+            subject: "Mathematics — Paper 2",
+            time: "14:00",
+            duration: "2 hrs",
+            venue: "Classrooms A–D",
+          },
+          {
+            date: "12 Jun",
+            day: "Wednesday",
+            subject: "Life Sciences",
+            time: "09:00",
+            duration: "2 hrs",
+            venue: "Science Lab",
+          },
+          {
+            date: "12 Jun",
+            day: "Wednesday",
+            subject: "Physical Sciences",
+            time: "14:00",
+            duration: "2 hrs",
+            venue: "Science Lab",
+          },
+          {
+            date: "13 Jun",
+            day: "Thursday",
+            subject: "History",
+            time: "09:00",
+            duration: "2 hrs",
+            venue: "Classrooms E–G",
+          },
+          {
+            date: "13 Jun",
+            day: "Thursday",
+            subject: "Geography",
+            time: "14:00",
+            duration: "2 hrs",
+            venue: "Classrooms E–G",
+          },
+          {
+            date: "14 Jun",
+            day: "Friday",
+            subject: "Accounting",
+            time: "09:00",
+            duration: "2 hrs",
+            venue: "Classrooms H–J",
+          },
+          {
+            date: "14 Jun",
+            day: "Friday",
+            subject: "Business Studies",
+            time: "14:00",
+            duration: "2 hrs",
+            venue: "Classrooms H–J",
+          },
+          {
+            date: "17 Jun",
+            day: "Monday",
+            subject: "Computer Applications Technology",
+            time: "09:00",
+            duration: "2 hrs",
+            venue: "ICT Lab",
+          },
+          {
+            date: "17 Jun",
+            day: "Monday",
+            subject: "Life Orientation",
+            time: "14:00",
+            duration: "1.5 hrs",
+            venue: "Hall A",
+          },
+        ],
+        grade11: [
+          {
+            date: "10 Jun",
+            day: "Monday",
+            subject: "English HL — Paper 1",
+            time: "09:00",
+            duration: "2 hrs",
+            venue: "Hall B",
+          },
+          {
+            date: "10 Jun",
+            day: "Monday",
+            subject: "English HL — Paper 2",
+            time: "14:00",
+            duration: "2 hrs",
+            venue: "Hall B",
+          },
+          {
+            date: "11 Jun",
+            day: "Tuesday",
+            subject: "Mathematics — Paper 1",
+            time: "09:00",
+            duration: "2.5 hrs",
+            venue: "Classrooms K–N",
+          },
+          {
+            date: "11 Jun",
+            day: "Tuesday",
+            subject: "Mathematics — Paper 2",
+            time: "14:00",
+            duration: "2.5 hrs",
+            venue: "Classrooms K–N",
+          },
+          {
+            date: "12 Jun",
+            day: "Wednesday",
+            subject: "Physical Sciences P1",
+            time: "09:00",
+            duration: "2 hrs",
+            venue: "Science Lab",
+          },
+          {
+            date: "12 Jun",
+            day: "Wednesday",
+            subject: "Physical Sciences P2",
+            time: "14:00",
+            duration: "2 hrs",
+            venue: "Science Lab",
+          },
+          {
+            date: "13 Jun",
+            day: "Thursday",
+            subject: "Life Sciences P1",
+            time: "09:00",
+            duration: "2 hrs",
+            venue: "Classrooms K–N",
+          },
+          {
+            date: "13 Jun",
+            day: "Thursday",
+            subject: "Life Sciences P2",
+            time: "14:00",
+            duration: "2 hrs",
+            venue: "Classrooms K–N",
+          },
+          {
+            date: "14 Jun",
+            day: "Friday",
+            subject: "Accounting",
+            time: "09:00",
+            duration: "2.5 hrs",
+            venue: "Hall B",
+          },
+          {
+            date: "17 Jun",
+            day: "Monday",
+            subject: "Business Studies",
+            time: "09:00",
+            duration: "2 hrs",
+            venue: "Classrooms K–N",
+          },
+          {
+            date: "17 Jun",
+            day: "Monday",
+            subject: "Economics",
+            time: "14:00",
+            duration: "2 hrs",
+            venue: "Classrooms K–N",
+          },
+        ],
+        grade12: [
+          {
+            date: "5 Aug",
+            day: "Monday",
+            subject: "English HL — Paper 1",
+            time: "09:00",
+            duration: "2 hrs",
+            venue: "Main Hall",
+          },
+          {
+            date: "5 Aug",
+            day: "Monday",
+            subject: "English HL — Paper 2",
+            time: "14:00",
+            duration: "2.5 hrs",
+            venue: "Main Hall",
+          },
+          {
+            date: "6 Aug",
+            day: "Tuesday",
+            subject: "English HL — Paper 3",
+            time: "09:00",
+            duration: "2.5 hrs",
+            venue: "Main Hall",
+          },
+          {
+            date: "7 Aug",
+            day: "Wednesday",
+            subject: "Mathematics — Paper 1",
+            time: "09:00",
+            duration: "3 hrs",
+            venue: "Main Hall",
+          },
+          {
+            date: "8 Aug",
+            day: "Thursday",
+            subject: "Mathematics — Paper 2",
+            time: "09:00",
+            duration: "3 hrs",
+            venue: "Main Hall",
+          },
+          {
+            date: "9 Aug",
+            day: "Friday",
+            subject: "Physical Sciences P1",
+            time: "09:00",
+            duration: "3 hrs",
+            venue: "Main Hall",
+          },
+          {
+            date: "12 Aug",
+            day: "Monday",
+            subject: "Physical Sciences P2",
+            time: "09:00",
+            duration: "3 hrs",
+            venue: "Main Hall",
+          },
+          {
+            date: "13 Aug",
+            day: "Tuesday",
+            subject: "Life Sciences P1",
+            time: "09:00",
+            duration: "2.5 hrs",
+            venue: "Main Hall",
+          },
+          {
+            date: "14 Aug",
+            day: "Wednesday",
+            subject: "Life Sciences P2",
+            time: "09:00",
+            duration: "2.5 hrs",
+            venue: "Main Hall",
+          },
+          {
+            date: "15 Aug",
+            day: "Thursday",
+            subject: "Accounting",
+            time: "09:00",
+            duration: "3 hrs",
+            venue: "Main Hall",
+          },
+          {
+            date: "16 Aug",
+            day: "Friday",
+            subject: "Business Studies",
+            time: "09:00",
+            duration: "2 hrs",
+            venue: "Main Hall",
+          },
+          {
+            date: "19 Aug",
+            day: "Monday",
+            subject: "Economics",
+            time: "09:00",
+            duration: "2 hrs",
+            venue: "Main Hall",
+          },
+          {
+            date: "20 Aug",
+            day: "Tuesday",
+            subject: "History — Paper 1",
+            time: "09:00",
+            duration: "3 hrs",
+            venue: "Main Hall",
+          },
+          {
+            date: "21 Aug",
+            day: "Wednesday",
+            subject: "History — Paper 2",
+            time: "09:00",
+            duration: "3 hrs",
+            venue: "Main Hall",
+          },
+          {
+            date: "22 Aug",
+            day: "Thursday",
+            subject: "Geography — Paper 1",
+            time: "09:00",
+            duration: "3 hrs",
+            venue: "Main Hall",
+          },
+          {
+            date: "23 Aug",
+            day: "Friday",
+            subject: "Geography — Paper 2",
+            time: "09:00",
+            duration: "2 hrs",
+            venue: "Main Hall",
+          },
+        ],
+      };
+    </script>
+
+    <!-- ── ANNOUNCEMENT BANNER ──────────────────────────── -->
+    <div id="announcement-bar">
+      <span id="announcement-text"></span>
+      <button class="announcement-close" onclick="closeAnnouncement()">
+        ✕
+      </button>
+    </div>
+
+    <!-- ── HEADER ────────────────────────────────────────── -->
+    <header>
+      <div class="header-inner">
+        <div class="logo" onclick="showPage('home')">
+          <div class="logo-mark">EHS</div>
+          <div class="logo-text">
+            <span class="logo-name">Excellence High School</span>
+            <span class="logo-sub">Nurturing Minds · Building Futures</span>
+          </div>
+        </div>
+        <nav id="desktop-nav">
+          <button class="nav-link active" onclick="showPage('home')">
+            Home
+          </button>
+          <button class="nav-link" onclick="showPage('about')">About</button>
+          <button class="nav-link" onclick="showPage('admissions')">
+            Admissions
+          </button>
+          <button class="nav-link" onclick="showPage('subjects')">
+            Subjects
+          </button>
+          <button class="nav-link" onclick="showPage('timetable')">
+            Timetable
+          </button>
+          <button class="nav-link" onclick="showPage('team')">Our Team</button>
+          <button class="nav-link" onclick="showPage('song')">
+            School Song
+          </button>
+          <button class="nav-link" onclick="showPage('gallery')">
+            Gallery
+          </button>
+          <button class="nav-link" onclick="showPage('contact')">
+            Contact
+          </button>
+        </nav>
+        <button class="hamburger" id="hamburger" onclick="toggleMobileNav()">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </header>
+
+    <div class="mobile-nav" id="mobile-nav">
+      <button
+        class="nav-link"
+        onclick="
+          showPage('home');
+          closeMobileNav();
+        "
+      >
+        🏠 Home
+      </button>
+      <button
+        class="nav-link"
+        onclick="
+          showPage('about');
+          closeMobileNav();
+        "
+      >
+        🏫 About
+      </button>
+      <button
+        class="nav-link"
+        onclick="
+          showPage('admissions');
+          closeMobileNav();
+        "
+      >
+        📋 Admissions
+      </button>
+      <button
+        class="nav-link"
+        onclick="
+          showPage('subjects');
+          closeMobileNav();
+        "
+      >
+        📚 Subjects
+      </button>
+      <button
+        class="nav-link"
+        onclick="
+          showPage('timetable');
+          closeMobileNav();
+        "
+      >
+        📅 Timetable
+      </button>
+      <button
+        class="nav-link"
+        onclick="
+          showPage('team');
+          closeMobileNav();
+        "
+      >
+        👥 Our Team
+      </button>
+      <button
+        class="nav-link"
+        onclick="
+          showPage('song');
+          closeMobileNav();
+        "
+      >
+        🎵 School Song
+      </button>
+      <button
+        class="nav-link"
+        onclick="
+          showPage('gallery');
+          closeMobileNav();
+        "
+      >
+        🖼️ Gallery
+      </button>
+      <button
+        class="nav-link"
+        onclick="
+          showPage('contact');
+          closeMobileNav();
+        "
+      >
+        📞 Contact
+      </button>
+    </div>
+
+    <!-- ============================================================
+     HOME PAGE
+     ============================================================ -->
+    <div id="page-home" class="page active">
+      <!-- Hero -->
+      <div class="hero">
+        <div class="slide active slide-1">
+          <div class="slide-content">
+            <div class="slide-badge">Welcome to Excellence High School</div>
+            <h1>Where Learning Meets Purpose</h1>
+            <p>
+              Nurturing curious minds, building confident leaders, inspiring a
+              lifelong love of learning.
+            </p>
+            <button class="slide-cta" onclick="showPage('admissions')">
+              Explore Admissions →
+            </button>
+          </div>
+        </div>
+        <div class="slide slide-2">
+          <div class="slide-content">
+            <div class="slide-badge">Academic Excellence</div>
+            <h1>Education That Opens Doors</h1>
+            <p>
+              Outstanding results, dedicated teachers, and a curriculum designed
+              for tomorrow's world.
+            </p>
+            <button class="slide-cta" onclick="showPage('subjects')">
+              View Our Subjects →
+            </button>
+          </div>
+        </div>
+        <div class="slide slide-3">
+          <div class="slide-content">
+            <div class="slide-badge">Join Our Community</div>
+            <h1>More Than Just a School</h1>
+            <p>
+              Sports, arts, leadership — a community that supports every student
+              to find their greatness.
+            </p>
+            <button class="slide-cta" onclick="showPage('about')">
+              Our Story →
+            </button>
+          </div>
+        </div>
+        <div class="carousel-dots">
+          <button class="dot active" onclick="goToSlide(0)"></button>
+          <button class="dot" onclick="goToSlide(1)"></button>
+          <button class="dot" onclick="goToSlide(2)"></button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-strip">
+        <div class="container">
+          <div class="stats-grid">
+            <div class="text-center">
+              <div class="stat-number" data-target="1200">0</div>
+              <div class="stat-label">Students Enrolled</div>
+            </div>
+            <div class="text-center">
+              <div class="stat-number" data-target="85">0</div>
+              <div class="stat-label">% Matric Pass Rate</div>
+            </div>
+            <div class="text-center">
+              <div class="stat-number" data-target="60">0</div>
+              <div class="stat-label">Qualified Teachers</div>
+            </div>
+            <div class="text-center">
+              <div class="stat-number" data-target="25">0</div>
+              <div class="stat-label">Years of Excellence</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About intro -->
+      <div class="section">
+        <div class="container">
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 4rem;
+              align-items: center;
+            "
+          >
+            <div>
+              <div class="section-label">Who We Are</div>
+              <h2 class="section-title">
+                A School Built on Excellence & Character
+              </h2>
+              <p style="margin-bottom: 1.5rem">
+                Excellence High School has been shaping futures for over two
+                decades. We believe education goes beyond textbooks — it is
+                about developing confident, ethical, and capable individuals
+                ready for whatever the world brings.
+              </p>
+              <p style="margin-bottom: 2rem">
+                Our dedicated staff, modern facilities, and vibrant community
+                create an environment where every student can discover their
+                potential and thrive.
+              </p>
+              <button class="btn btn-primary" onclick="showPage('about')">
+                Learn More About Us
+              </button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 1rem">
+              <div
+                class="card"
+                style="
+                  border-left: 3px solid var(--school-primary);
+                  border-radius: var(--radius-md);
+                "
+              >
+                <h4 style="color: var(--text-primary); margin-bottom: 0.35rem">
+                  🎯 Our Vision
+                </h4>
+                <p style="font-size: 0.875rem">
+                  To produce globally competitive graduates who lead with
+                  integrity and purpose.
+                </p>
+              </div>
+              <div
+                class="card"
+                style="
+                  border-left: 3px solid var(--school-secondary);
+                  border-radius: var(--radius-md);
+                "
+              >
+                <h4 style="color: var(--text-primary); margin-bottom: 0.35rem">
+                  🚀 Our Mission
+                </h4>
+                <p style="font-size: 0.875rem">
+                  To provide inclusive, innovative education that challenges
+                  every student to reach their full potential.
+                </p>
+              </div>
+              <div
+                class="card"
+                style="
+                  border-left: 3px solid #10b981;
+                  border-radius: var(--radius-md);
+                "
+              >
+                <h4 style="color: var(--text-primary); margin-bottom: 0.35rem">
+                  ❤️ Our Values
+                </h4>
+                <p style="font-size: 0.875rem">
+                  Excellence, Integrity, Inclusivity, Innovation, Respect, and
+                  Service.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEWS — Dynamic from Google Sheets -->
+      <div class="section" style="background: var(--bg-muted); padding: 5rem 0">
+        <div class="container">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-end;
+              flex-wrap: wrap;
+              gap: 1rem;
+              margin-bottom: 2.5rem;
+            "
+          >
+            <div>
+              <div class="section-label">Stay Informed</div>
+              <h2 class="section-title">Latest News & Announcements</h2>
+              <p
+                style="
+                  font-size: 0.875rem;
+                  color: var(--text-muted);
+                  margin-top: 0.5rem;
+                "
+              >
+                Updated automatically from the school's Google Sheet
+              </p>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="loadAllDynamic()">
+              🔄 Refresh
+            </button>
+          </div>
+          <div id="news-container">
+            <div class="loading-state">
+              <div class="spinner"></div>
+              <p>Loading news…</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EVENTS — Dynamic from Google Sheets -->
+      <div class="section">
+        <div class="container">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-end;
+              flex-wrap: wrap;
+              gap: 1rem;
+              margin-bottom: 2.5rem;
+            "
+          >
+            <div>
+              <div class="section-label gold">Upcoming</div>
+              <h2 class="section-title">Events & Important Dates</h2>
+              <p
+                style="
+                  font-size: 0.875rem;
+                  color: var(--text-muted);
+                  margin-top: 0.5rem;
+                "
+              >
+                Updated automatically from the school's Google Sheet
+              </p>
+            </div>
+          </div>
+          <div id="events-container">
+            <div class="loading-state">
+              <div class="spinner"></div>
+              <p>Loading events…</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Programs -->
+      <div class="section" style="background: var(--bg-muted); padding: 5rem 0">
+        <div class="container">
+          <div class="section-header text-center" style="margin-bottom: 3rem">
+            <div class="section-label">What We Offer</div>
+            <h2 class="section-title">Programs & Activities</h2>
+            <p class="section-desc">
+              A well-rounded education that develops the whole student —
+              academically, socially, and personally.
+            </p>
+          </div>
+          <div class="card-grid fade-in">
+            <div class="card">
+              <div class="card-icon icon-blue">📖</div>
+              <h3>Academic Excellence</h3>
+              <p>
+                Comprehensive curriculum with small class sizes, personalised
+                attention, and a culture of high achievement.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-icon icon-gold">⚽</div>
+              <h3>Sports & Athletics</h3>
+              <p>
+                Soccer, basketball, volleyball, athletics and more. Build
+                teamwork, discipline, and lasting confidence.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-icon icon-blue">🎨</div>
+              <h3>Arts & Culture</h3>
+              <p>
+                Music, drama, visual arts, and dance. Express creativity and
+                celebrate cultural diversity.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-icon icon-gold">💻</div>
+              <h3>Technology & STEM</h3>
+              <p>
+                Coding, robotics, and digital design preparing students for
+                careers in a technology-driven world.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-icon icon-blue">🌱</div>
+              <h3>Leadership Development</h3>
+              <p>
+                Student government, mentoring, and community service that build
+                responsible future leaders.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-icon icon-gold">🧭</div>
+              <h3>Career Guidance</h3>
+              <p>
+                Experienced counselors helping students explore pathways and
+                make informed decisions about their future.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="section text-center">
+        <div class="container" style="max-width: 640px">
+          <div class="section-label">Ready to Join Us?</div>
+          <h2 class="section-title">Begin Your Journey at Excellence High</h2>
+          <p class="section-desc" style="margin: 0 auto 2rem">
+            Applications are open. Take the first step towards an extraordinary
+            education.
+          </p>
+          <div
+            style="
+              display: flex;
+              gap: 1rem;
+              justify-content: center;
+              flex-wrap: wrap;
+            "
+          >
+            <button class="btn btn-primary" onclick="showPage('admissions')">
+              Apply Now
+            </button>
+            <button class="btn btn-outline" onclick="showPage('contact')">
+              Contact Us
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+     ABOUT PAGE
+     ============================================================ -->
+    <div id="page-about" class="page">
+      <div class="section">
+        <div class="container">
+          <div class="section-label">Our Story</div>
+          <h2 class="section-title">About Excellence High School</h2>
+          <p style="font-size: 1.05rem; max-width: 760px; margin-bottom: 3rem">
+            Excellence High School has stood as a beacon of quality education
+            for over two decades. Founded on principles of academic rigour,
+            character development, and holistic growth, we have consistently
+            delivered outstanding graduates who make meaningful contributions to
+            society.
+          </p>
+          <div class="vm-grid fade-in">
+            <div class="vm-card vm-vision">
+              <div class="vm-icon">🎯</div>
+              <h3>Our Vision</h3>
+              <p>
+                To be a beacon of educational excellence, producing globally
+                competitive graduates who think critically, act ethically, and
+                serve humanity with integrity and purpose.
+              </p>
+            </div>
+            <div class="vm-card vm-mission">
+              <div class="vm-icon">🚀</div>
+              <h3>Our Mission</h3>
+              <p>
+                To provide inclusive, innovative education that challenges
+                students to reach their full potential, develops responsible
+                citizenship, and prepares them for success in a rapidly changing
+                world.
+              </p>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="section-label">What Guides Us</div>
+          <h2 class="section-title" style="margin-bottom: 0">
+            Our Core Values
+          </h2>
+          <div class="values-grid fade-in">
+            <div class="value-item">
+              <div class="value-emoji">⭐</div>
+              <h4>Excellence</h4>
+              <p>Striving for the highest standards in everything we do</p>
+            </div>
+            <div class="value-item">
+              <div class="value-emoji">🤝</div>
+              <h4>Integrity</h4>
+              <p>Acting with honesty, fairness, and moral courage always</p>
+            </div>
+            <div class="value-item">
+              <div class="value-emoji">🌍</div>
+              <h4>Inclusivity</h4>
+              <p>Celebrating diversity and welcoming every learner</p>
+            </div>
+            <div class="value-item">
+              <div class="value-emoji">💡</div>
+              <h4>Innovation</h4>
+              <p>Embracing change and fostering creative thinking</p>
+            </div>
+            <div class="value-item">
+              <div class="value-emoji">🙏</div>
+              <h4>Respect</h4>
+              <p>Valuing every individual and their unique contributions</p>
+            </div>
+            <div class="value-item">
+              <div class="value-emoji">🫶</div>
+              <h4>Service</h4>
+              <p>Making positive contributions to our broader community</p>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="section-label">Why Choose Us</div>
+          <h2 class="section-title" style="margin-bottom: 2rem">
+            The Excellence Difference
+          </h2>
+          <div class="card-grid fade-in">
+            <div class="card">
+              <div class="card-icon icon-blue">👩‍🏫</div>
+              <h3>Expert Teachers</h3>
+              <p>
+                Over 60 qualified, passionate educators committed to your
+                child's growth and success.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-icon icon-gold">🏫</div>
+              <h3>Modern Facilities</h3>
+              <p>
+                State-of-the-art classrooms, laboratories, sports fields, and
+                ICT centres.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-icon icon-blue">🏆</div>
+              <h3>Proven Results</h3>
+              <p>
+                Consistently strong matric results with high distinction and
+                university placement rates.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-icon icon-gold">❤️</div>
+              <h3>Pastoral Care</h3>
+              <p>
+                A robust support system ensuring every student's emotional and
+                social well-being.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+     ADMISSIONS PAGE
+     ============================================================ -->
+    <div id="page-admissions" class="page">
+      <div class="section">
+        <div class="container">
+          <div class="section-label">Enrol Today</div>
+          <h2 class="section-title">Admissions</h2>
+          <p style="font-size: 1.05rem; max-width: 680px; margin-bottom: 2rem">
+            We welcome students who demonstrate academic potential, strong
+            character, and a desire to contribute to our thriving school
+            community.
+          </p>
+          <div class="highlight-box">
+            <p>
+              📅 <strong>Applications for 2025 are now open.</strong> Deadline:
+              31 October 2024. Early applications are encouraged as spaces are
+              limited.
+            </p>
+          </div>
+          <div class="divider"></div>
+          <div class="section-label">How to Apply</div>
+          <h2 class="section-title" style="margin-bottom: 2rem">
+            The Admission Process
+          </h2>
+          <div class="steps fade-in">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-body">
+                <h4>Submit Your Application</h4>
+                <p>
+                  Download and complete the Admission Application Form. Return
+                  with all required documents — previous school reports, birth
+                  certificate, and ID copies — to the school office or email
+                  admissions@excellencehigh.edu.za.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-body">
+                <h4>Entrance Assessment</h4>
+                <p>
+                  Shortlisted applicants write entrance assessments in English,
+                  Mathematics, and Reasoning. This helps us understand each
+                  student's learning profile and place them appropriately.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-body">
+                <h4>Parent & Student Interview</h4>
+                <p>
+                  Candidates and their parent or guardian attend a short,
+                  relaxed interview with our admissions team. This allows us to
+                  get to know your family and answer any questions you may have.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">4</div>
+              <div class="step-body">
+                <h4>Offer & Enrolment</h4>
+                <p>
+                  Successful candidates receive a formal offer of placement.
+                  Upon acceptance, families complete enrolment paperwork, pay
+                  the registration fee, and attend our welcome orientation.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="section-label">Documents</div>
+          <h2 class="section-title" style="margin-bottom: 2rem">
+            Download Admission Documents
+          </h2>
+          <div
+            style="display: flex; flex-direction: column; gap: 1rem"
+            class="fade-in"
+          >
+            <div class="download-card">
+              <div class="download-icon">📄</div>
+              <div class="download-info">
+                <h4>Admission Application Form</h4>
+                <p>Complete PDF form for new student applications</p>
+              </div>
+              <button
+                class="btn btn-primary btn-sm"
+                onclick="fakeDownload('Application Form')"
+              >
+                ⬇ Download
+              </button>
+            </div>
+            <div class="download-card">
+              <div class="download-icon">📘</div>
+              <div class="download-info">
+                <h4>School Prospectus 2025</h4>
+                <p>Comprehensive overview of school programs and philosophy</p>
+              </div>
+              <button
+                class="btn btn-primary btn-sm"
+                onclick="fakeDownload('School Prospectus')"
+              >
+                ⬇ Download
+              </button>
+            </div>
+            <div class="download-card">
+              <div class="download-icon">💳</div>
+              <div class="download-info">
+                <h4>Fee Structure & Payment Options</h4>
+                <p>Detailed school fees and SGB fee exemption information</p>
+              </div>
+              <button
+                class="btn btn-secondary btn-sm"
+                onclick="fakeDownload('Fee Structure')"
+              >
+                ⬇ Download
+              </button>
+            </div>
+            <div class="download-card">
+              <div class="download-icon">📗</div>
+              <div class="download-info">
+                <h4>Parent & Guardian Handbook</h4>
+                <p>School rules, expectations, and community guidelines</p>
+              </div>
+              <button
+                class="btn btn-secondary btn-sm"
+                onclick="fakeDownload('Parent Handbook')"
+              >
+                ⬇ Download
+              </button>
+            </div>
+            <div class="download-card">
+              <div class="download-icon">📜</div>
+              <div class="download-info">
+                <h4>Fee Exemption Application (SASA Section 39)</h4>
+                <p>For families applying for partial or full fee exemption</p>
+              </div>
+              <button
+                class="btn btn-outline btn-sm"
+                onclick="fakeDownload('Fee Exemption Form')"
+              >
+                ⬇ Download
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+     SUBJECTS PAGE
+     ============================================================ -->
+    <div id="page-subjects" class="page">
+      <div class="section">
+        <div class="container">
+          <div class="section-label">Curriculum</div>
+          <h2 class="section-title">Subjects Offered</h2>
+          <p style="font-size: 1.05rem; max-width: 700px; margin-bottom: 3rem">
+            Excellence High School offers a comprehensive curriculum spanning
+            Languages, Sciences, Humanities, Arts, and Technology. Students
+            select subjects aligned with their strengths, interests, and career
+            aspirations.
+          </p>
+          <div class="subject-group fade-in">
+            <div class="subject-group-title">📚 Core Languages</div>
+            <div class="subject-grid">
+              <div class="subject-item">
+                <div class="subject-dot dot-blue"></div>
+                <span>English Home Language</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-blue"></div>
+                <span>English First Additional Language</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-blue"></div>
+                <span>Zulu Home Language</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-blue"></div>
+                <span>Xhosa First Additional Language</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-blue"></div>
+                <span>Afrikaans First Additional Language</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-blue"></div>
+                <span>French Second Additional Language</span>
+              </div>
+            </div>
+          </div>
+          <div class="subject-group fade-in">
+            <div class="subject-group-title">🔢 Mathematics & Science</div>
+            <div class="subject-grid">
+              <div class="subject-item">
+                <div class="subject-dot dot-gold"></div>
+                <span>Mathematics</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-gold"></div>
+                <span>Mathematical Literacy</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-gold"></div>
+                <span>Physical Sciences</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-gold"></div>
+                <span>Life Sciences (Biology)</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-gold"></div>
+                <span>Technical Mathematics</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-gold"></div>
+                <span>Technical Sciences</span>
+              </div>
+            </div>
+          </div>
+          <div class="subject-group fade-in">
+            <div class="subject-group-title">
+              🌍 Humanities & Social Sciences
+            </div>
+            <div class="subject-grid">
+              <div class="subject-item">
+                <div class="subject-dot dot-green"></div>
+                <span>History</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-green"></div>
+                <span>Geography</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-green"></div>
+                <span>Life Orientation</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-green"></div>
+                <span>Religion Studies</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-green"></div>
+                <span>Social Sciences</span>
+              </div>
+            </div>
+          </div>
+          <div class="subject-group fade-in">
+            <div class="subject-group-title">💼 Commerce & Business</div>
+            <div class="subject-grid">
+              <div class="subject-item">
+                <div class="subject-dot dot-purple"></div>
+                <span>Accounting</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-purple"></div>
+                <span>Business Studies</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-purple"></div>
+                <span>Economics</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-purple"></div>
+                <span>Consumer Studies</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-purple"></div>
+                <span>Entrepreneurship & Business Management</span>
+              </div>
+            </div>
+          </div>
+          <div class="subject-group fade-in">
+            <div class="subject-group-title">🎨 Arts, Design & Technology</div>
+            <div class="subject-grid">
+              <div class="subject-item">
+                <div class="subject-dot dot-pink"></div>
+                <span>Visual Arts</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-pink"></div>
+                <span>Music</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-pink"></div>
+                <span>Dramatic Arts</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-pink"></div>
+                <span>Design</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-pink"></div>
+                <span>Computer Applications Technology</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-pink"></div>
+                <span>Information Technology</span>
+              </div>
+            </div>
+          </div>
+          <div class="subject-group fade-in">
+            <div class="subject-group-title">🛠️ Technical & Vocational</div>
+            <div class="subject-grid">
+              <div class="subject-item">
+                <div class="subject-dot dot-teal"></div>
+                <span>Engineering Graphics & Design</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-teal"></div>
+                <span>Civil Technology</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-teal"></div>
+                <span>Electrical Technology</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-teal"></div>
+                <span>Mechanical Technology</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-teal"></div>
+                <span>Agricultural Sciences</span>
+              </div>
+              <div class="subject-item">
+                <div class="subject-dot dot-teal"></div>
+                <span>Hospitality Studies</span>
+              </div>
+            </div>
+          </div>
+          <div class="highlight-box fade-in">
+            <p>
+              💬 <strong>Subject Selection Guidance:</strong> Our experienced
+              career counselors work with every student and parent to choose the
+              right subject combination. Book a counseling session through the
+              Contact page.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+     TIMETABLE PAGE — Fully Dynamic
+     ============================================================ -->
+    <div id="page-timetable" class="page">
+      <div class="section">
+        <div class="container">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              flex-wrap: wrap;
+              gap: 1rem;
+              margin-bottom: 2rem;
+            "
+          >
+            <div>
+              <div class="section-label">Academic Calendar</div>
+              <h2 class="section-title">Exam & Test Timetable</h2>
+              <p
+                style="
+                  font-size: 0.875rem;
+                  color: var(--text-muted);
+                  margin-top: 0.5rem;
+                "
+              >
+                Updated automatically from the school's Google Sheet · Two
+                sessions per day are displayed together
+              </p>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="loadAllTimetables()">
+              🔄 Refresh from Sheet
+            </button>
+          </div>
+
+          <div class="timetable-notice">
+            <span style="font-size: 1.2rem; flex-shrink: 0">📌</span>
+            <p>
+              Students must arrive <strong>15 minutes before</strong> each
+              session. Bring your student ID and all required stationery. Mobile
+              phones are strictly prohibited in exam venues. Click your grade
+              below to view your full timetable.
+            </p>
+          </div>
+
+          <div class="grade-accordion">
+            <!-- Grade 10 -->
+            <div class="grade-item" id="gi-10">
+              <button class="grade-trigger" onclick="toggleGrade(10)">
+                <div class="grade-trigger-left">
+                  <span class="grade-badge">Grade 10</span>
+                  <h3 id="tt-title-10">Examination Schedule</h3>
+                </div>
+                <span class="grade-arrow" id="arrow-10">▼</span>
+              </button>
+              <div class="grade-content" id="gc-10">
+                <div id="tt-10">
+                  <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading timetable…</p>
+                  </div>
+                </div>
+                <div class="print-btn">
+                  <button
+                    class="btn btn-outline btn-sm"
+                    onclick="printTimetable(10)"
+                  >
+                    🖨️ Print Grade 10 Timetable
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Grade 11 -->
+            <div class="grade-item" id="gi-11">
+              <button class="grade-trigger" onclick="toggleGrade(11)">
+                <div class="grade-trigger-left">
+                  <span class="grade-badge">Grade 11</span>
+                  <h3 id="tt-title-11">Examination Schedule</h3>
+                </div>
+                <span class="grade-arrow" id="arrow-11">▼</span>
+              </button>
+              <div class="grade-content" id="gc-11">
+                <div id="tt-11">
+                  <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading timetable…</p>
+                  </div>
+                </div>
+                <div class="print-btn">
+                  <button
+                    class="btn btn-outline btn-sm"
+                    onclick="printTimetable(11)"
+                  >
+                    🖨️ Print Grade 11 Timetable
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Grade 12 -->
+            <div class="grade-item" id="gi-12">
+              <button class="grade-trigger" onclick="toggleGrade(12)">
+                <div class="grade-trigger-left">
+                  <span class="grade-badge gold">Grade 12</span>
+                  <h3 id="tt-title-12">Trial Examination Schedule — Matric</h3>
+                </div>
+                <span class="grade-arrow" id="arrow-12">▼</span>
+              </button>
+              <div class="grade-content" id="gc-12">
+                <div id="tt-12">
+                  <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading timetable…</p>
+                  </div>
+                </div>
+                <div class="print-btn">
+                  <button
+                    class="btn btn-secondary btn-sm"
+                    onclick="printTimetable(12)"
+                  >
+                    🖨️ Print Grade 12 Timetable
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="highlight-box" style="margin-top: 2rem">
+            <p>
+              🔄 <strong>How to update this timetable:</strong> Open the
+              connected Google Sheet, go to the relevant grade tab, and add,
+              edit, or delete rows. The website reflects your changes
+              automatically. You can have as many rows as needed — two rows on
+              the same date automatically appear as morning and afternoon
+              sessions.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+     SCHOOL SONG
+     ============================================================ -->
+    <div id="page-song" class="page">
+      <div class="section">
+        <div class="container" style="max-width: 800px">
+          <div class="song-card fade-in">
+            <div class="song-header">
+              <div
+                class="section-label"
+                style="
+                  color: rgba(255, 255, 255, 0.7);
+                  background: rgba(255, 255, 255, 0.1);
+                  margin-bottom: 1rem;
+                "
+              >
+                # Official School Song
+              </div>
+              <h2>"Building Tomorrow's Leaders"</h2>
+              <p class="song-subtitle">
+                Words & Music by the Excellence High School Music Department ·
+                Adopted 2020
+              </p>
+            </div>
+            <div class="song-body">
+              <div class="song-section">
+                <div class="song-section-label">Verse 1</div>
+                <div class="song-lyrics">
+                  In halls of learning, bright and true,<br />Where minds expand
+                  with every day,<br />We gather here to pursue<br />Excellence
+                  in every way.
+                </div>
+              </div>
+              <div class="song-section">
+                <div class="song-section-label">Chorus</div>
+                <div class="chorus-lyrics">
+                  Excellence, Excellence High,<br />Building leaders, reaching
+                  sky,<br />With integrity and care,<br />We show the world we
+                  dare!<br /><br />Excellence, Excellence High,<br />Together we
+                  will never shy,<br />From challenges ahead —<br />We'll lead
+                  where others thread!
+                </div>
+              </div>
+              <div class="song-section">
+                <div class="song-section-label">Verse 2</div>
+                <div class="song-lyrics">
+                  Through science, sport, and artful grace,<br />With teachers
+                  wise and hearts so strong,<br />We find our voice, we find our
+                  place,<br />In this community we belong.
+                </div>
+              </div>
+              <div class="song-section">
+                <div class="song-section-label">Bridge</div>
+                <div class="song-lyrics" style="font-style: italic">
+                  From every corner of this land,<br />We come together, hand in
+                  hand,<br />To dream and grow and understand —<br />That
+                  together we will stand!
+                </div>
+              </div>
+              <div class="song-section">
+                <div class="song-section-label">Final Chorus</div>
+                <div class="chorus-lyrics">
+                  Excellence, Excellence High,<br />Our legacy will never
+                  die,<br />With pride and determination true —<br />Excellence
+                  in all we do!
+                </div>
+              </div>
+              <div
+                style="
+                  margin-top: 2.5rem;
+                  padding-top: 1.5rem;
+                  border-top: 1px solid var(--border);
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: 1rem;
+                "
+              >
+                <div class="meta-badge blue">🎵 Sung at assemblies</div>
+                <div class="meta-badge gold">🎓 Graduation ceremonies</div>
+                <div class="meta-badge blue">🏆 Prize-giving events</div>
+                <div class="meta-badge gold">⚽ Sports days</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+     TEAM PAGE
+     ============================================================ -->
+    <div id="page-team" class="page">
+      <div class="section">
+        <div class="container">
+          <div class="section-label">The People Behind Excellence</div>
+          <h2 class="section-title">Our Team</h2>
+          <p style="font-size: 1.05rem; max-width: 680px; margin-bottom: 3rem">
+            Meet the dedicated educators and leaders who make Excellence High
+            School what it is — passionate, experienced, and committed to every
+            student's growth.
+          </p>
+          <div class="section-label">Senior Leadership</div>
+          <h2 class="section-title" style="margin-bottom: 2rem">
+            Management Team
+          </h2>
+          <div class="card-grid-3 fade-in">
+            <div class="team-card">
+              <div class="team-avatar avatar-1">👨‍💼</div>
+              <div class="team-info">
+                <h3>Dr. Samuel Okafor</h3>
+                <div class="team-role">Principal</div>
+                <p>
+                  Over 20 years in education. Visionary leader committed to
+                  academic excellence and student-centred development.
+                </p>
+              </div>
+            </div>
+            <div class="team-card">
+              <div class="team-avatar avatar-2">👩‍💼</div>
+              <div class="team-info">
+                <h3>Mrs. Lindiwe Ndaba</h3>
+                <div class="team-role">Deputy Principal — Academics</div>
+                <p>
+                  15 years teaching experience. Oversees curriculum design,
+                  academic standards, and teacher development.
+                </p>
+              </div>
+            </div>
+            <div class="team-card">
+              <div class="team-avatar avatar-3">👨‍💼</div>
+              <div class="team-info">
+                <h3>Mr. Themba Zweli</h3>
+                <div class="team-role">
+                  Deputy Principal — Discipline & Welfare
+                </div>
+                <p>
+                  Specialist in pastoral care and positive school culture.
+                  Ensures every student feels safe and supported.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="section-label">Department Heads</div>
+          <h2 class="section-title" style="margin-bottom: 2rem">
+            Heads of Department
+          </h2>
+          <div class="card-grid fade-in">
+            <div class="team-card">
+              <div
+                class="team-avatar avatar-1"
+                style="height: 120px; font-size: 2rem"
+              >
+                📚
+              </div>
+              <div class="team-info">
+                <h3>Mrs. Amelia Mwangi</h3>
+                <div class="team-role">HOD — Languages</div>
+                <p>
+                  Expert in multilingual education and literacy development
+                  across all grade levels.
+                </p>
+              </div>
+            </div>
+            <div class="team-card">
+              <div
+                class="team-avatar avatar-2"
+                style="height: 120px; font-size: 2rem"
+              >
+                🔬
+              </div>
+              <div class="team-info">
+                <h3>Prof. Kwame Asante</h3>
+                <div class="team-role">HOD — Sciences</div>
+                <p>
+                  PhD in Chemistry. Champion of inquiry-based STEM learning and
+                  scientific thinking.
+                </p>
+              </div>
+            </div>
+            <div class="team-card">
+              <div
+                class="team-avatar avatar-3"
+                style="height: 120px; font-size: 2rem"
+              >
+                🔢
+              </div>
+              <div class="team-info">
+                <h3>Mr. Rajesh Patel</h3>
+                <div class="team-role">HOD — Mathematics</div>
+                <p>
+                  Passionate about making mathematics accessible and exciting
+                  for every learner.
+                </p>
+              </div>
+            </div>
+            <div class="team-card">
+              <div
+                class="team-avatar avatar-4"
+                style="height: 120px; font-size: 2rem"
+              >
+                🎨
+              </div>
+              <div class="team-info">
+                <h3>Mrs. Priya Sharma</h3>
+                <div class="team-role">HOD — Arts & Culture</div>
+                <p>
+                  Advocates for creative expression, cultural celebration, and
+                  artistic talent at every level.
+                </p>
+              </div>
+            </div>
+            <div class="team-card">
+              <div
+                class="team-avatar avatar-5"
+                style="height: 120px; font-size: 2rem"
+              >
+                ⚽
+              </div>
+              <div class="team-info">
+                <h3>Coach Marcus Watson</h3>
+                <div class="team-role">HOD — Physical Education</div>
+                <p>
+                  Builds champions on and off the field with discipline and
+                  dedication.
+                </p>
+              </div>
+            </div>
+            <div class="team-card">
+              <div
+                class="team-avatar avatar-6"
+                style="height: 120px; font-size: 2rem"
+              >
+                💻
+              </div>
+              <div class="team-info">
+                <h3>Ms. Zainab Hassan</h3>
+                <div class="team-role">HOD — Technology</div>
+                <p>
+                  Leads our digital transformation and 21st-century skills
+                  programme with innovation.
+                </p>
+              </div>
+            </div>
+            <div class="team-card">
+              <div
+                class="team-avatar avatar-1"
+                style="height: 120px; font-size: 2rem"
+              >
+                💼
+              </div>
+              <div class="team-info">
+                <h3>Mr. Sipho Dlamini</h3>
+                <div class="team-role">HOD — Commerce</div>
+                <p>
+                  Brings real-world business experience into the classroom,
+                  inspiring future entrepreneurs.
+                </p>
+              </div>
+            </div>
+            <div class="team-card">
+              <div
+                class="team-avatar avatar-2"
+                style="height: 120px; font-size: 2rem"
+              >
+                🧭
+              </div>
+              <div class="team-info">
+                <h3>Dr. Paul Osei</h3>
+                <div class="team-role">HOD — Student Support & Guidance</div>
+                <p>
+                  Provides holistic counselling, career guidance, and mentoring
+                  support for all students.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+     GALLERY PAGE
+     ============================================================ -->
+    <div id="page-gallery" class="page">
+      <div class="section">
+        <div class="container">
+          <div class="section-label">Moments & Memories</div>
+          <h2 class="section-title">School Gallery</h2>
+          <p style="font-size: 1.05rem; max-width: 680px; margin-bottom: 3rem">
+            A glimpse into life at Excellence High School — students in action,
+            celebrating achievements, and building memories that last a
+            lifetime.
+          </p>
+          <div class="gallery-grid fade-in">
+            <div class="gallery-item">
+              <div class="gallery-img g1">📚</div>
+              <div class="gallery-overlay">
+                <div class="gallery-caption">Learning in Action</div>
+              </div>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-img g2">⚽</div>
+              <div class="gallery-overlay">
+                <div class="gallery-caption">Annual Sports Day</div>
+              </div>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-img g3">🎨</div>
+              <div class="gallery-overlay">
+                <div class="gallery-caption">Arts Exhibition</div>
+              </div>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-img g4">🔬</div>
+              <div class="gallery-overlay">
+                <div class="gallery-caption">Science Fair</div>
+              </div>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-img g5">🏆</div>
+              <div class="gallery-overlay">
+                <div class="gallery-caption">Prize Giving 2023</div>
+              </div>
+            </div>
+          </div>
+          <div class="highlight-box" style="margin-top: 2rem">
+            <p>
+              📸 <strong>To add real photos:</strong> Replace each gallery
+              item's emoji and gradient with an <code>&lt;img&gt;</code> tag.
+              Example:
+              <code
+                >&lt;img src="sports-day.jpg"
+                style="width:100%;height:100%;object-fit:cover;"&gt;</code
+              >
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+     CONTACT PAGE
+     ============================================================ -->
+    <div id="page-contact" class="page">
+      <div class="section">
+        <div class="container">
+          <div class="section-label">Get in Touch</div>
+          <h2 class="section-title">Contact Us</h2>
+          <p style="font-size: 1.05rem; max-width: 680px; margin-bottom: 3rem">
+            We'd love to hear from you — whether you're a prospective parent,
+            current family, or community member.
+          </p>
+          <div class="contact-grid">
+            <div>
+              <div class="contact-info-stack">
+                <div class="contact-info-card">
+                  <div class="contact-icon">📍</div>
+                  <div class="contact-detail">
+                    <h4>Physical Address</h4>
+                    <p>
+                      123 Education Avenue<br />Johannesburg, Gauteng<br />South
+                      Africa, 2001
+                    </p>
+                  </div>
+                </div>
+                <div class="contact-info-card">
+                  <div class="contact-icon">📞</div>
+                  <div class="contact-detail">
+                    <h4>Phone Numbers</h4>
+                    <a href="tel:+27112345678">+27 11 234 5678 — Main Office</a
+                    ><a href="tel:+27112345679">+27 11 234 5679 — Admissions</a
+                    ><a href="tel:+27112345680">+27 11 234 5680 — Finance</a>
+                  </div>
+                </div>
+                <div class="contact-info-card">
+                  <div class="contact-icon">📧</div>
+                  <div class="contact-detail">
+                    <h4>Email Addresses</h4>
+                    <a href="mailto:info@excellencehigh.edu.za"
+                      >info@excellencehigh.edu.za</a
+                    ><a href="mailto:admissions@excellencehigh.edu.za"
+                      >admissions@excellencehigh.edu.za</a
+                    ><a href="mailto:finance@excellencehigh.edu.za"
+                      >finance@excellencehigh.edu.za</a
+                    >
+                  </div>
+                </div>
+                <div class="contact-info-card">
+                  <div class="contact-icon">⏰</div>
+                  <div class="contact-detail">
+                    <h4>Office Hours</h4>
+                    <p>Monday – Friday: 07:00 – 16:00</p>
+                    <p>Saturday: 08:00 – 12:00</p>
+                    <p>Sunday & Public Holidays: Closed</p>
+                  </div>
+                </div>
+                <div class="contact-info-card">
+                  <div class="contact-icon">💬</div>
+                  <div class="contact-detail">
+                    <h4>WhatsApp Business</h4>
+                    <p>
+                      Message us directly for quick queries. We respond within 2
+                      hours during office hours.
+                    </p>
+                    <a
+                      href="https://wa.me/27821234567?text=Hello%20Excellence%20High%20School%2C%20I%20would%20like%20to%20enquire%20about..."
+                      target="_blank"
+                      style="color: var(--school-primary); font-weight: 600"
+                      >Open WhatsApp Chat →</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-card">
+              <h3 style="margin-bottom: 0.5rem">Send Us a Message</h3>
+              <p style="font-size: 0.875rem; margin-bottom: 2rem">
+                Fill in the form and we'll get back to you within one business
+                day.
+              </p>
+              <form onsubmit="handleSubmit(event)">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>First Name *</label
+                    ><input type="text" required placeholder="Jane" />
+                  </div>
+                  <div class="form-group">
+                    <label>Last Name *</label
+                    ><input type="text" required placeholder="Smith" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Email Address *</label
+                  ><input type="email" required placeholder="jane@email.com" />
+                </div>
+                <div class="form-group">
+                  <label>Phone Number</label
+                  ><input type="tel" placeholder="+27 82 000 0000" />
+                </div>
+                <div class="form-group">
+                  <label>Enquiry Type *</label>
+                  <select required>
+                    <option value="">Select a category…</option>
+                    <option>Admissions Enquiry</option>
+                    <option>Academic Matters</option>
+                    <option>Fee & Finance</option>
+                    <option>Events & Activities</option>
+                    <option>Employment Opportunity</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Your Message *</label
+                  ><textarea
+                    required
+                    placeholder="Tell us how we can help you…"
+                  ></textarea>
+                </div>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  style="width: 100%; justify-content: center"
+                >
+                  Send Message →
+                </button>
+                <p
+                  style="
+                    font-size: 0.75rem;
+                    color: var(--text-muted);
+                    margin-top: 1rem;
+                    text-align: center;
+                  "
+                >
+                  By submitting you consent to being contacted in accordance
+                  with our Privacy Policy and POPIA regulations.
+                </p>
+              </form>
+            </div>
+          </div>
+          <!-- GOOGLE MAP -->
+          <div class="map-container">
+            <!--
+        REPLACE THIS with your Google Maps embed:
+        1. Go to maps.google.com and search for the school address
+        2. Click Share → Embed a map → Copy HTML
+        3. Paste the <iframe ...> tag here, replacing everything inside map-container
+      -->
+            <div class="map-placeholder">
+              <div class="map-icon">📍</div>
+              <p>123 Education Avenue, Johannesburg</p>
+              <small>Replace with your Google Maps embed code</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+     FOOTER
+     ============================================================ -->
+    <footer>
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="logo-mark">EHS</div>
+            <div
+              style="
+                color: #fff;
+                font-family: &quot;Playfair Display&quot;, serif;
+                font-size: 1rem;
+                margin-top: 0.5rem;
+              "
+            >
+              Excellence High School
+            </div>
+            <p>
+              Nurturing minds, building futures, and inspiring excellence in
+              every student since 1999.
+            </p>
+          </div>
+          <div class="footer-col">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a onclick="showPage('home')">Home</a></li>
+              <li><a onclick="showPage('about')">About Us</a></li>
+              <li><a onclick="showPage('admissions')">Admissions</a></li>
+              <li><a onclick="showPage('subjects')">Subjects</a></li>
+              <li><a onclick="showPage('timetable')">Exam Timetable</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>School Life</h4>
+            <ul>
+              <li><a onclick="showPage('team')">Our Team</a></li>
+              <li><a onclick="showPage('gallery')">Gallery</a></li>
+              <li><a onclick="showPage('song')">School Song</a></li>
+              <li><a onclick="showPage('contact')">Contact Us</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Contact</h4>
+            <ul>
+              <li><a href="tel:+27112345678">+27 11 234 5678</a></li>
+              <li>
+                <a href="mailto:info@excellencehigh.edu.za"
+                  >info@excellencehigh.edu.za</a
+                >
+              </li>
+              <li><a href="#">Facebook</a></li>
+              <li><a href="#">Instagram</a></li>
+              <li><a href="#">YouTube</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>
+            © 2024 Excellence High School. All rights reserved. |
+            <a href="#" style="color: rgba(255, 255, 255, 0.5)"
+              >Privacy Policy</a
+            >
+            |
+            <a href="#" style="color: rgba(255, 255, 255, 0.5)"
+              >POPIA Compliance</a
+            >
+          </p>
+          <p class="ambient-credit">
+            Designed & developed by <strong>Ambient Electron</strong>
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- WhatsApp Button -->
+    <!-- CUSTOMISE: Replace 27821234567 with the school's WhatsApp Business number -->
+    <a
+      class="whatsapp-btn"
+      href="https://wa.me/27821234567?text=Hello%20Excellence%20High%20School%20%F0%9F%91%8B%20I%20would%20like%20to%20enquire%20about..."
+      target="_blank"
+    >
+      <span class="wa-icon">💬</span>
+      <div>Chat with Us<span class="wa-label">WhatsApp Business</span></div>
+    </a>
+
+    <!-- Back to top -->
+    <button
+      class="back-top"
+      id="back-top"
+      onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
+    >
+      ↑
+    </button>
+
+    <!-- Cookie Banner -->
+    <div class="cookie-banner" id="cookie-banner">
+      <div class="cookie-text">
+        <strong>We value your privacy.</strong> This website uses cookies and
+        complies with <strong>POPIA</strong>. By continuing you consent to our
+        use of cookies. <a href="#">Privacy Policy</a>.
+      </div>
+      <div class="cookie-actions">
+        <button class="cookie-decline" onclick="dismissCookie()">
+          Decline
+        </button>
+        <button class="cookie-accept" onclick="acceptCookie()">Accept</button>
+      </div>
+    </div>
+
+    <script src="./js/script.js"></script>
+  </body>
 </html>

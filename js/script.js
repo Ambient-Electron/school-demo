@@ -1,90 +1,140 @@
 /* ── PAGE NAVIGATION ─────────────────────────────────────── */
-const PAGE_ORDER = ['home','about','admissions','subjects','timetable','team','song','gallery','contact'];
+const PAGE_ORDER = [
+  "home",
+  "about",
+  "admissions",
+  "subjects",
+  "timetable",
+  "team",
+  "song",
+  "gallery",
+  "contact",
+];
 
+/* Page titles shown in the browser tab per page */
 const PAGE_TITLES = {
-  home:       'Excellence High School',
-  about:      'About Us — Excellence High School',
-  admissions: 'Admissions — Excellence High School',
-  subjects:   'Subjects Offered — Excellence High School',
-  timetable:  'Exam Timetable — Excellence High School',
-  team:       'Our Team — Excellence High School',
-  song:       'School Song — Excellence High School',
-  gallery:    'Gallery — Excellence High School',
-  contact:    'Contact Us — Excellence High School',
+  home: "Excellence High School",
+  about: "About Us — Excellence High School",
+  admissions: "Admissions — Excellence High School",
+  subjects: "Subjects Offered — Excellence High School",
+  timetable: "Exam Timetable — Excellence High School",
+  team: "Our Team — Excellence High School",
+  song: "School Song — Excellence High School",
+  gallery: "Gallery — Excellence High School",
+  contact: "Contact Us — Excellence High School",
 };
 
 function showPage(id, pushState = true) {
-  if (!PAGE_ORDER.includes(id)) id = 'home';
+  /* Validate — fall back to home if unknown id */
+  if (!PAGE_ORDER.includes(id)) id = "home";
 
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('#desktop-nav .nav-link').forEach(l => l.classList.remove('active'));
-  const page = document.getElementById('page-' + id);
-  if (page) page.classList.add('active');
+  /* Show correct page, hide all others */
+  document
+    .querySelectorAll(".page")
+    .forEach((p) => p.classList.remove("active"));
+  document
+    .querySelectorAll("#desktop-nav .nav-link")
+    .forEach((l) => l.classList.remove("active"));
+  const page = document.getElementById("page-" + id);
+  if (page) page.classList.add("active");
   const idx = PAGE_ORDER.indexOf(id);
-  const navBtns = document.querySelectorAll('#desktop-nav .nav-link');
-  if (navBtns[idx]) navBtns[idx].classList.add('active');
+  const navBtns = document.querySelectorAll("#desktop-nav .nav-link");
+  if (navBtns[idx]) navBtns[idx].classList.add("active");
 
+  /* Update URL hash — this is what makes back/forward work */
   if (pushState) {
-    const hash = id === 'home' ? '' : '#' + id;
-    history.pushState({ page: id }, '', hash || window.location.pathname);
+    const hash = id === "home" ? "" : "#" + id;
+    history.pushState({ page: id }, "", hash || window.location.pathname);
   }
 
-  document.title = PAGE_TITLES[id] || 'Excellence High School';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  /* Update browser tab title */
+  document.title = PAGE_TITLES[id] || "Excellence High School";
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
   setTimeout(initFadeIns, 100);
-  if (id === 'timetable') loadAllTimetables();
+  if (id === "timetable") loadAllTimetables();
 }
 
 /* ── HASH ROUTER — handles back/forward button ───────────── */
-window.addEventListener('popstate', () => {
-  const id = window.location.hash.replace('#', '') || 'home';
-  showPage(id, false);
+/* When user presses back or forward, browser fires popstate.
+   We read the hash from the URL and show the correct page    */
+window.addEventListener("popstate", () => {
+  const id = window.location.hash.replace("#", "") || "home";
+  showPage(id, false); /* false = don't push another history entry */
 });
 
-/* ── MOBILE NAV ──────────────────────────────────────────── */
-function toggleMobileNav() {
-  document.getElementById('mobile-nav').classList.toggle('open');
-  document.getElementById('hamburger').classList.toggle('open');
+/* ── MOBILE OVERLAY NAV ──────────────────────────────────── */
+function openMobileMenu() {
+  document.getElementById("mobile-overlay").classList.add("open");
+  document.body.style.overflow = "hidden";
 }
-function closeMobileNav() {
-  document.getElementById('mobile-nav').classList.remove('open');
-  document.getElementById('hamburger').classList.remove('open');
+
+function closeMobileMenu() {
+  document.getElementById("mobile-overlay").classList.remove("open");
+  document.body.style.overflow = "";
 }
-document.addEventListener('click', e => {
-  if (!document.querySelector('header').contains(e.target) &&
-      !document.getElementById('mobile-nav').contains(e.target)) {
-    closeMobileNav();
-  }
+
+function toggleMobileGroup(groupId) {
+  const group = document.getElementById(groupId).parentElement;
+  group.classList.toggle("open");
+}
+
+/* Close overlay when clicking outside the inner content */
+document.getElementById("mobile-overlay") &&
+  document.getElementById("mobile-overlay").addEventListener("click", (e) => {
+    if (e.target === document.getElementById("mobile-overlay"))
+      closeMobileMenu();
+  });
+
+/* ── DESKTOP DROPDOWN NAV ────────────────────────────────── */
+function closeDropdowns() {
+  document
+    .querySelectorAll(".nav-dropdown")
+    .forEach((d) => d.classList.remove("open"));
+}
+
+document.querySelectorAll(".nav-dropdown-trigger").forEach((trigger) => {
+  trigger.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const dropdown = trigger.closest(".nav-dropdown");
+    const isOpen = dropdown.classList.contains("open");
+    closeDropdowns();
+    if (!isOpen) dropdown.classList.add("open");
+  });
 });
+
+document.addEventListener("click", () => closeDropdowns());
 
 /* ── CAROUSEL ────────────────────────────────────────────── */
 let curSlide = 0;
-const slides = document.querySelectorAll('.slide');
-const dots   = document.querySelectorAll('.dot');
+const slides = document.querySelectorAll(".slide");
+const dots = document.querySelectorAll(".dot");
 
 function goToSlide(n) {
-  slides[curSlide].classList.remove('active');
-  dots[curSlide].classList.remove('active');
+  slides[curSlide].classList.remove("active");
+  dots[curSlide].classList.remove("active");
   curSlide = n;
-  slides[curSlide].classList.add('active');
-  dots[curSlide].classList.add('active');
+  slides[curSlide].classList.add("active");
+  dots[curSlide].classList.add("active");
 }
 setInterval(() => goToSlide((curSlide + 1) % slides.length), 5500);
 
 /* ── COUNTERS ────────────────────────────────────────────── */
 function animateCounter(el) {
-  const target = parseInt(el.getAttribute('data-target'));
+  const target = parseInt(el.getAttribute("data-target"));
   const step = target / (2000 / 16);
   let cur = 0;
   const t = setInterval(() => {
     cur += step;
-    if (cur >= target) { el.textContent = target.toLocaleString(); clearInterval(t); }
-    else el.textContent = Math.floor(cur).toLocaleString();
+    if (cur >= target) {
+      el.textContent = target.toLocaleString();
+      clearInterval(t);
+    } else el.textContent = Math.floor(cur).toLocaleString();
   }, 16);
 }
 function initCounters() {
-  document.querySelectorAll('[data-target]').forEach(el => {
-    const obs = new IntersectionObserver(entries => {
+  document.querySelectorAll("[data-target]").forEach((el) => {
+    const obs = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
         animateCounter(el);
         obs.disconnect();
@@ -96,37 +146,53 @@ function initCounters() {
 
 /* ── FADE IN ─────────────────────────────────────────────── */
 function initFadeIns() {
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
-    });
-  }, { threshold: 0.08 });
-  document.querySelectorAll('.fade-in:not(.visible)').forEach(el => obs.observe(el));
+  const obs = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add("visible");
+          obs.unobserve(e.target);
+        }
+      });
+    },
+    { threshold: 0.08 },
+  );
+  document
+    .querySelectorAll(".fade-in:not(.visible)")
+    .forEach((el) => obs.observe(el));
 }
 
 /* ── CSV PARSER ──────────────────────────────────────────── */
 function parseCSV(text) {
-  const lines = text.trim().split('\n');
+  const lines = text.trim().split("\n");
   if (lines.length < 2) return [];
-  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-  return lines.slice(1).map(line => {
-    const cols = [];
-    let cur = '', inQ = false;
-    for (let ch of line) {
-      if (ch === '"') { inQ = !inQ; }
-      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
-      else cur += ch;
-    }
-    cols.push(cur.trim());
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = (cols[i] || '').replace(/"/g, ''));
-    return obj;
-  }).filter(r => Object.values(r).some(v => v));
+  const headers = lines[0].split(",").map((h) => h.trim().replace(/"/g, ""));
+  return lines
+    .slice(1)
+    .map((line) => {
+      /* handle commas inside quoted fields */
+      const cols = [];
+      let cur = "",
+        inQ = false;
+      for (let ch of line) {
+        if (ch === '"') {
+          inQ = !inQ;
+        } else if (ch === "," && !inQ) {
+          cols.push(cur.trim());
+          cur = "";
+        } else cur += ch;
+      }
+      cols.push(cur.trim());
+      const obj = {};
+      headers.forEach((h, i) => (obj[h] = (cols[i] || "").replace(/"/g, "")));
+      return obj;
+    })
+    .filter((r) => Object.values(r).some((v) => v));
 }
 
 /* ── FETCH SHEET OR FALL BACK TO SAMPLE ─────────────────── */
 async function fetchSheet(url, sampleKey) {
-  if (!url || url.includes('YOUR_')) return SAMPLE[sampleKey];
+  if (!url || url.includes("YOUR_")) return SAMPLE[sampleKey];
   try {
     const r = await fetch(url);
     const text = await r.text();
@@ -139,76 +205,87 @@ async function fetchSheet(url, sampleKey) {
 
 /* ── NEWS RENDERER ───────────────────────────────────────── */
 const NEWS_GRADIENTS = [
-  'linear-gradient(135deg,#dbeafe,#bfdbfe)',
-  'linear-gradient(135deg,#fef3c7,#fde68a)',
-  'linear-gradient(135deg,#ede9fe,#ddd6fe)',
+  "linear-gradient(135deg,#dbeafe,#bfdbfe)",
+  "linear-gradient(135deg,#fef3c7,#fde68a)",
+  "linear-gradient(135deg,#ede9fe,#ddd6fe)",
 ];
 
 async function loadNews() {
-  const container = document.getElementById('news-container');
+  const container = document.getElementById("news-container");
   if (!container) return;
-  container.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Loading news…</p></div>';
-  const items = await fetchSheet(SHEETS.news, 'news');
+  container.innerHTML =
+    '<div class="loading-state"><div class="spinner"></div><p>Loading news…</p></div>';
+  const items = await fetchSheet(SHEETS.news, "news");
   if (!items.length) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📰</div><p>No news available at this time.</p></div>';
+    container.innerHTML =
+      '<div class="empty-state"><div class="empty-icon">📰</div><p>No news available at this time.</p></div>';
     return;
   }
-  container.innerHTML = `<div class="news-grid">${
-    items.slice(0, 3).map((item, i) => `
+  container.innerHTML = `<div class="news-grid">${items
+    .slice(0, 3)
+    .map(
+      (item, i) => `
       <div class="news-card">
-        <div class="news-img" style="background:${NEWS_GRADIENTS[i % 3]}">${item.icon || item.Icon || '📰'}</div>
+        <div class="news-img" style="background:${NEWS_GRADIENTS[i % 3]}">${item.icon || item.Icon || "📰"}</div>
         <div class="news-body">
           <div class="news-meta">
-            <span class="news-category">${item.category || item.Category || 'News'}</span>
-            <span class="news-date">${item.date || item.Date || ''}</span>
+            <span class="news-category">${item.category || item.Category || "News"}</span>
+            <span class="news-date">${item.date || item.Date || ""}</span>
           </div>
-          <h3>${item.title || item.Title || ''}</h3>
-          <p>${item.description || item.Description || ''}</p>
+          <h3>${item.title || item.Title || ""}</h3>
+          <p>${item.description || item.Description || ""}</p>
         </div>
-      </div>`).join('')
-  }</div>`;
+      </div>`,
+    )
+    .join("")}</div>`;
 }
 
 /* ── EVENTS RENDERER ─────────────────────────────────────── */
 async function loadEvents() {
-  const container = document.getElementById('events-container');
+  const container = document.getElementById("events-container");
   if (!container) return;
-  container.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Loading events…</p></div>';
-  const items = await fetchSheet(SHEETS.events, 'events');
+  container.innerHTML =
+    '<div class="loading-state"><div class="spinner"></div><p>Loading events…</p></div>';
+  const items = await fetchSheet(SHEETS.events, "events");
   if (!items.length) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><p>No upcoming events at this time.</p></div>';
+    container.innerHTML =
+      '<div class="empty-state"><div class="empty-icon">📅</div><p>No upcoming events at this time.</p></div>';
     return;
   }
-  container.innerHTML = `<div class="events-list">${
-    items.map(item => `
+  container.innerHTML = `<div class="events-list">${items
+    .map(
+      (item) => `
       <div class="event-item">
         <div class="event-date-box">
-          <div class="event-day">${item.date || item.Date || '—'}</div>
-          <div class="event-month">${item.month || item.Month || ''}</div>
+          <div class="event-day">${item.date || item.Date || "—"}</div>
+          <div class="event-month">${item.month || item.Month || ""}</div>
         </div>
         <div class="event-info">
-          <h4>${item.name || item['Event Name'] || item.event || ''}</h4>
-          <p>${item.description || item.Description || ''}</p>
+          <h4>${item.name || item["Event Name"] || item.event || ""}</h4>
+          <p>${item.description || item.Description || ""}</p>
         </div>
-        <div class="event-icon">${item.icon || item.Icon || '📅'}</div>
-      </div>`).join('')
-  }</div>`;
+        <div class="event-icon">${item.icon || item.Icon || "📅"}</div>
+      </div>`,
+    )
+    .join("")}</div>`;
 }
 
 /* ── ANNOUNCEMENTS ───────────────────────────────────────── */
 async function loadAnnouncements() {
-  const bar  = document.getElementById('announcement-bar');
-  const text = document.getElementById('announcement-text');
-  const items = await fetchSheet(SHEETS.announcements, 'announcements');
-  const active = items.find(i => (i.active || i.Active || '').toUpperCase() === 'YES');
+  const bar = document.getElementById("announcement-bar");
+  const text = document.getElementById("announcement-text");
+  const items = await fetchSheet(SHEETS.announcements, "announcements");
+  const active = items.find(
+    (i) => (i.active || i.Active || "").toUpperCase() === "YES",
+  );
   if (active) {
-    text.textContent = `📢 ${active.message || active.Message || ''}`;
-    bar.classList.add('show');
+    text.textContent = `📢 ${active.message || active.Message || ""}`;
+    bar.classList.add("show");
   }
 }
 
 function closeAnnouncement() {
-  document.getElementById('announcement-bar').classList.remove('show');
+  document.getElementById("announcement-bar").classList.remove("show");
 }
 
 /* ── TIMETABLE — GROUP BY DATE THEN BY TIME ─────────────── */
@@ -226,13 +303,19 @@ function closeAnnouncement() {
 */
 function groupByDateThenTime(rows) {
   const dateMap = new Map();
-  rows.forEach(row => {
-    const date     = (row.date     || row.Date     || '').trim();
-    const day      = (row.day      || row.Day      || '').trim();
-    const time     = (row.time     || row.Time     || row['Start Time'] || row.starttime || '').trim();
-    const subject  = (row.subject  || row.Subject  || '').trim();
-    const duration = (row.duration || row.Duration || '').trim();
-    const venue    = (row.venue    || row.Venue    || '').trim();
+  rows.forEach((row) => {
+    const date = (row.date || row.Date || "").trim();
+    const day = (row.day || row.Day || "").trim();
+    const time = (
+      row.time ||
+      row.Time ||
+      row["Start Time"] ||
+      row.starttime ||
+      ""
+    ).trim();
+    const subject = (row.subject || row.Subject || "").trim();
+    const duration = (row.duration || row.Duration || "").trim();
+    const venue = (row.venue || row.Venue || "").trim();
     if (!date) return;
     if (!dateMap.has(date)) dateMap.set(date, { day, timeSlots: new Map() });
     const dayGroup = dateMap.get(date);
@@ -243,15 +326,16 @@ function groupByDateThenTime(rows) {
 }
 
 function isAMTime(time) {
-  const hour = parseInt((time || '0').split(':')[0], 10);
+  const hour = parseInt((time || "0").split(":")[0], 10);
   return hour < 12;
 }
 
 function renderTimetable(rows) {
-  if (!rows || !rows.length) return '<div class="empty-state"><div class="empty-icon">📅</div><p>No timetable data available. Update the Google Sheet to populate this timetable.</p></div>';
+  if (!rows || !rows.length)
+    return '<div class="empty-state"><div class="empty-icon">📅</div><p>No timetable data available. Update the Google Sheet to populate this timetable.</p></div>';
 
   const dateMap = groupByDateThenTime(rows);
-  let html = '';
+  let html = "";
 
   dateMap.forEach((dayGroup, date) => {
     const sessionCount = dayGroup.timeSlots.size;
@@ -259,28 +343,34 @@ function renderTimetable(rows) {
       <div class="tt-day-header">
         <span class="tt-day-label">${date}</span>
         <span class="tt-day-name">${dayGroup.day}</span>
-        ${sessionCount > 1 ? `<span class="meta-badge blue" style="margin-left:auto;font-size:.7rem;">${sessionCount} session${sessionCount > 1 ? 's' : ''}</span>` : ''}
+        ${sessionCount > 1 ? `<span class="meta-badge blue" style="margin-left:auto;font-size:.7rem;">${sessionCount} session${sessionCount > 1 ? "s" : ""}</span>` : ""}
       </div>
       <div class="tt-sessions">`;
 
     dayGroup.timeSlots.forEach((papers, time) => {
       const am = isAMTime(time);
-      const pillClass = am ? '' : 'pm';
-      const pillLabel = am ? 'AM' : 'PM';
+      const pillClass = am ? "" : "pm";
+      const pillLabel = am ? "AM" : "PM";
 
       if (papers.length > 1) {
+        /* Multiple subjects at the same time — one session block, list papers inside */
         html += `<div class="tt-session tt-session-multi">
           <div class="tt-time">${time}<span class="session-pill ${pillClass}">${pillLabel}</span></div>
           <div class="tt-multi-papers">
-            ${papers.map(p => `
+            ${papers
+              .map(
+                (p) => `
               <div class="tt-paper-row">
                 <span class="tt-subject">${p.subject}</span>
                 <span class="tt-duration">${p.duration}</span>
                 <span class="tt-venue">${p.venue}</span>
-              </div>`).join('')}
+              </div>`,
+              )
+              .join("")}
           </div>
         </div>`;
       } else {
+        /* Single subject at this time — normal single row */
         const p = papers[0];
         html += `<div class="tt-session">
           <div class="tt-time">${time}<span class="session-pill ${pillClass}">${pillLabel}</span></div>
@@ -298,33 +388,42 @@ function renderTimetable(rows) {
 }
 
 async function loadGradeTimetable(grade) {
-  const key       = `grade${grade}`;
-  const url       = SHEETS[key];
+  const key = `grade${grade}`;
+  const url = SHEETS[key];
+  const sKey = `grade${grade}`;
   const container = document.getElementById(`tt-${grade}`);
   if (!container) return;
-  container.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Loading timetable…</p></div>';
-  const rows = await fetchSheet(url, `grade${grade}`);
+  container.innerHTML =
+    '<div class="loading-state"><div class="spinner"></div><p>Loading timetable…</p></div>';
+  const rows = await fetchSheet(url, sKey);
   container.innerHTML = renderTimetable(rows);
 }
 
 async function loadAllTimetables() {
-  await Promise.all([loadGradeTimetable(10), loadGradeTimetable(11), loadGradeTimetable(12)]);
+  await Promise.all([
+    loadGradeTimetable(10),
+    loadGradeTimetable(11),
+    loadGradeTimetable(12),
+  ]);
 }
 
 /* ── GRADE ACCORDION ─────────────────────────────────────── */
 function toggleGrade(grade) {
-  const item   = document.getElementById(`gi-${grade}`);
-  const isOpen = item.classList.contains('open');
-  document.querySelectorAll('.grade-item').forEach(i => i.classList.remove('open'));
-  if (!isOpen) item.classList.add('open');
+  const item = document.getElementById(`gi-${grade}`);
+  const isOpen = item.classList.contains("open");
+  document
+    .querySelectorAll(".grade-item")
+    .forEach((i) => i.classList.remove("open"));
+  if (!isOpen) item.classList.add("open");
 }
 
 /* ── PRINT TIMETABLE ─────────────────────────────────────── */
 function printTimetable(grade) {
   const container = document.getElementById(`tt-${grade}`);
   if (!container) return;
-  const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html><html><head><title>Grade ${grade} Exam Timetable — Excellence High School</title>
+  const win = window.open("", "_blank");
+  win.document
+    .write(`<!DOCTYPE html><html><head><title>Grade ${grade} Exam Timetable — Excellence High School</title>
   <style>
     body{font-family:sans-serif;padding:2rem;color:#111;}
     h1{color:#2563eb;font-size:1.4rem;margin-bottom:.25rem;}
@@ -333,14 +432,12 @@ function printTimetable(grade) {
     .tt-day-header{background:#f1f5f9;padding:.6rem 1rem;font-weight:700;font-size:.9rem;border:1px solid #e2e8f0;border-bottom:none;}
     .tt-sessions{border:1px solid #e2e8f0;}
     .tt-session{display:grid;grid-template-columns:100px 1fr 90px 120px;padding:.65rem 1rem;border-bottom:1px solid #f1f5f9;font-size:.85rem;gap:1rem;}
-    .tt-session-multi{grid-template-columns:100px 1fr;}
     .tt-session:last-child{border-bottom:none;}
     .tt-time{font-weight:700;color:#2563eb;}
-    .tt-paper-row{display:grid;grid-template-columns:1fr 80px 110px;gap:.5rem;padding:.25rem 0;font-size:.82rem;}
     .footer{margin-top:2rem;font-size:.75rem;color:#999;border-top:1px solid #e2e8f0;padding-top:1rem;}
   </style></head><body>
   <h1>Excellence High School — Grade ${grade} Exam Timetable</h1>
-  <div class="sub">Printed ${new Date().toLocaleDateString('en-ZA')} · info@excellencehigh.edu.za · +27 11 234 5678</div>
+  <div class="sub">Printed ${new Date().toLocaleDateString("en-ZA")} · info@excellencehigh.edu.za · +27 11 234 5678</div>
   ${container.innerHTML}
   <div class="footer">Excellence High School · 123 Education Avenue, Johannesburg · 2001 | Designed by Ambient Electron</div>
   </body></html>`);
@@ -357,38 +454,53 @@ async function loadAllDynamic() {
 function handleSubmit(e) {
   e.preventDefault();
   const btn = e.target.querySelector('button[type="submit"]');
-  btn.textContent = '✓ Message Sent!';
-  btn.style.background = '#10b981';
+  btn.textContent = "✓ Message Sent!";
+  btn.style.background = "#10b981";
   setTimeout(() => {
-    btn.textContent = 'Send Message →';
-    btn.style.background = '';
+    btn.textContent = "Send Message →";
+    btn.style.background = "";
     e.target.reset();
   }, 3000);
 }
 
 /* ── DOWNLOADS ───────────────────────────────────────────── */
 function fakeDownload(name) {
-  alert(`"${name}" will download here.\n\nTo enable:\n1. Upload your PDF to the same folder as this HTML file\n2. Replace onclick with: window.open('filename.pdf')`);
+  alert(
+    `"${name}" will download here.\n\nTo enable:\n1. Upload your PDF to the same folder as this HTML file\n2. Replace onclick with: window.open('filename.pdf')`,
+  );
 }
 
 /* ── COOKIE ──────────────────────────────────────────────── */
-function acceptCookie()  { localStorage.setItem('ehs-cookie', 'accepted'); document.getElementById('cookie-banner').classList.remove('show'); }
-function dismissCookie() { localStorage.setItem('ehs-cookie', 'declined'); document.getElementById('cookie-banner').classList.remove('show'); }
+function acceptCookie() {
+  localStorage.setItem("ehs-cookie", "accepted");
+  document.getElementById("cookie-banner").classList.remove("show");
+}
+function dismissCookie() {
+  localStorage.setItem("ehs-cookie", "declined");
+  document.getElementById("cookie-banner").classList.remove("show");
+}
 
 /* ── BACK TO TOP ─────────────────────────────────────────── */
-window.addEventListener('scroll', () => {
-  document.getElementById('back-top').classList.toggle('show', window.scrollY > 400);
+window.addEventListener("scroll", () => {
+  document
+    .getElementById("back-top")
+    .classList.toggle("show", window.scrollY > 400);
 });
 
 /* ── INIT ────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', () => {
-  const initialPage = window.location.hash.replace('#', '') || 'home';
+document.addEventListener("DOMContentLoaded", () => {
+  /* Read hash on first load so direct links work
+     e.g. yoursite.netlify.app/#admissions opens Admissions */
+  const initialPage = window.location.hash.replace("#", "") || "home";
   showPage(initialPage, false);
 
   initCounters();
   initFadeIns();
   loadAllDynamic();
-  if (!localStorage.getItem('ehs-cookie')) {
-    setTimeout(() => document.getElementById('cookie-banner').classList.add('show'), 1800);
+  if (!localStorage.getItem("ehs-cookie")) {
+    setTimeout(
+      () => document.getElementById("cookie-banner").classList.add("show"),
+      1800,
+    );
   }
 });

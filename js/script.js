@@ -358,15 +358,18 @@ function renderTimetable(rows) {
           <div class="tt-time">${time}<span class="session-pill ${pillClass}">${pillLabel}</span></div>
           <div class="tt-multi-papers">
             ${papers
-              .map(
-                (p) => `
+            .map(
+              (p) => `
               <div class="tt-paper-row">
-                <span class="tt-subject">${p.subject}</span>
-                <span class="tt-duration">${p.duration}</span>
-                <span class="tt-venue">${p.venue}</span>
-              </div>`,
-              )
-              .join("")}
+  <span class="tt-subject">${p.subject}</span>
+  <div class="tt-meta-row">
+    <span class="tt-duration">${p.duration}</span>
+    <span class="tt-meta-dot">·</span>
+    <span class="tt-venue">${p.venue}</span>
+  </div>
+</div>`,
+            )
+            .join("")}
           </div>
         </div>`;
       } else {
@@ -375,8 +378,11 @@ function renderTimetable(rows) {
         html += `<div class="tt-session">
           <div class="tt-time">${time}<span class="session-pill ${pillClass}">${pillLabel}</span></div>
           <div class="tt-subject">${p.subject}</div>
-          <div class="tt-duration">${p.duration}</div>
-          <div class="tt-venue">${p.venue}</div>
+          <div class="tt-meta-row">
+            <span class="tt-duration">${p.duration}</span>
+            <span class="tt-meta-dot">·</span>
+            <span class="tt-venue">${p.venue}</span>
+          </div>
         </div>`;
       }
     });
@@ -401,6 +407,8 @@ async function loadGradeTimetable(grade) {
 
 async function loadAllTimetables() {
   await Promise.all([
+    loadGradeTimetable(8),
+    loadGradeTimetable(9),
     loadGradeTimetable(10),
     loadGradeTimetable(11),
     loadGradeTimetable(12),

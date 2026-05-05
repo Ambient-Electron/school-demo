@@ -2137,14 +2137,54 @@ footer {
   .hero {
     height: 420px;
   }
-  .tt-session {
-    grid-template-columns: 80px 1fr;
-    gap: 0.5rem;
-  }
-  .tt-duration,
-  .tt-venue {
-    display: none;
-  }
+ .tt-session {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.85rem 1rem;
+  align-items: flex-start;
+}
+
+.tt-time {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--school-primary);
+}
+
+.tt-subject {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tt-duration,
+.tt-venue {
+  display: inline;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.tt-meta-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.tt-paper-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.4rem 0.6rem;
+  width: 100%;
+}
+
+.tt-paper-row .tt-duration,
+.tt-paper-row .tt-venue {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  display: inline;
+}
+
   .whatsapp-btn .wa-text span,
   .whatsapp-btn .wa-label {
     display: none;
